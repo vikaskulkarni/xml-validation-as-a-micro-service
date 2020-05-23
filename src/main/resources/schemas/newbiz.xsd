@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2006-2018 Fair Isaac Corporation.  All rights reserved.  -->
+
+
+
+<xs:schema
+	 xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	 xmlns="http://www.crsoftwareinc.com/xml/ns/titanium/common/v1_0"
+	 targetNamespace="http://www.crsoftwareinc.com/xml/ns/titanium/common/v1_0"
+	 elementFormDefault="qualified" attributeFormDefault="unqualified">
+	 
+	<xs:include schemaLocation="./newbiz/new-biz-consumerType.xsd"/>
+    <xs:include schemaLocation="./common/general-reference-type.xsd"/>
+	
+	<xs:element name="newbiz">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="header" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>file header info</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="sender_id_txt" type="xs:string" minOccurs="0"/>
+							<xs:element name="target_id_txt" type="xs:string" minOccurs="0"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="newbiz-header">
+					<xs:annotation>
+						<xs:documentation>batch header info</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="header-code" type="xs:string" minOccurs="0"/>
+							<xs:element name="batch-number" type="xs:string" minOccurs="0"/>
+							<xs:element name="batch-date" type="xs:date" minOccurs="0"/>
+							<xs:element name="total-consumers" type="xs:int"/>
+							<xs:element name="creditor-name" type="xs:string"/>
+							<xs:element name="total-principal" type="monetary-type"/>
+							<xs:element name="total-charge" type="monetary-type"/>
+							<xs:element name="total-interest" type="monetary-type"/>
+							<xs:element name="total-balance" type="monetary-type"/>
+							<xs:element name="total-consumer-accounts-count" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                            <xs:element name="total-placement-consumer-account-balance" type="monetary-type" minOccurs="0" maxOccurs="1"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="consumers">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="consumer" type="new-biz-consumerType" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

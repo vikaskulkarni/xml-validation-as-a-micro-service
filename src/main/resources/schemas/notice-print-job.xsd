@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2006-2018 Fair Isaac Corporation.  All rights reserved.  -->
+
+
+
+<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by tutu (OPEC) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.crsoftwareinc.com/xml/ns/titanium/common/v1_0" targetNamespace="http://www.crsoftwareinc.com/xml/ns/titanium/common/v1_0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<!-- includes -->
+	<xs:include schemaLocation="./notice/letter-writing.xsd"/>
+	<xs:include schemaLocation="./notice/notice-print-consumerType.xsd"/>
+	<!-- print job -->
+	<xs:element name="print-job">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="print-job-header">
+					<xs:annotation>
+						<xs:documentation>Header has all the job-level information </xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="header-code" type="xs:string"/>
+							<xs:element name="batch-number" type="xs:string"/>
+							<xs:element name="batch-date" type="xs:date"/>
+							<xs:element name="paper-size" type="xs:string"/>
+							<xs:element name="notice-batch-id" type="xs:string"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="agency" type="agency-locationsType"/>
+				<xs:element name="consumers">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="consumer" type="notice-print-consumerType" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
