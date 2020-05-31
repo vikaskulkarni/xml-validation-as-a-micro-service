@@ -5,4 +5,5 @@ target
 .factorypath
 .project
 .settings
-aplication.log
+application.log*
+src/main/uploads/*

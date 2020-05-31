@@ -7,10 +7,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class UploadFileResponse {
-	private String fileName;
-	private String fileDownloadUri;
-	private String fileType;
-	private long size;
-	private ValidationResponse valid;
+public class ValidationResponse {
+    boolean isValid;
+    int lineNumber;
+    int columnNumber;
+    String message;
 }

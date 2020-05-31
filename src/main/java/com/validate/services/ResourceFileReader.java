@@ -24,56 +24,61 @@ import javax.xml.transform.Source;
 
 @Service
 public class ResourceFileReader {
-	@Autowired
-	ResourceLoader resourceLoader;
+    @Autowired
+    ResourceLoader resourceLoader;
 
-	public File getResourceFile(String fileName) throws IOException {
-		return getResource(fileName).getFile();
-	}
+    public File getResourceFile(String fileName) throws IOException {
+        return getResource(fileName).getFile();
+    }
 
-	public InputStream getResourceFileStream(String fileName) throws IOException {
-		return getResource(fileName).getInputStream();
-	}
+    public InputStream getResourceFileStream(String fileName) throws IOException {
+        return getResource(fileName).getInputStream();
+    }
 
-	public String readFileUsingStream(String filePath) {
-		StringBuilder contentBuilder = new StringBuilder();
-		try (Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
-			stream.forEach(s -> contentBuilder.append(s).append("\n"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return contentBuilder.toString();
-	}
+    public String readFileUsingStream(String filePath) {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
+    }
 
-	public ArrayList<String> getXsdFilesList() {
-		ArrayList<String> filesList = new ArrayList<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(getResourceFilePath("schemas")))) {
-			stream.forEach(path -> filesList.add(path.getFileName().toString()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return filesList;
-	}
+    public ArrayList<String> getXsdFilesList() {
 
-	public String getResourceFilePath(String fileName) throws IOException {
-		return getResourceFile(fileName).getPath();
-	}
+        ArrayList<String> filesList = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(getResourceFilePath("schemas")))) {
 
-	private Resource getResource(String fileName) {
-		return resourceLoader.getResource((new StringBuilder("classpath:").append(fileName)).toString());
-	}
+            stream.forEach(path -> {
+                String fileNameWithoutExt = path.getFileName().toString().replaceFirst("[.][^.]+$", "");
+                filesList.add(fileNameWithoutExt);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return filesList;
+    }
 
-	public File loadXSDFile(String xsdFileName) {
-		String fileName = xsdFileName + ".xsd";
-		try {
-			File xsdFile = getResourceFile("/schemas/" + fileName);
-			if (xsdFile.exists()) {
-				return xsdFile;
-			} else {
-				throw new FileNotFoundException("File not found " + fileName);
-			}
-		} catch (IOException ex) {
-			throw new FileNotFoundException("File not found " + fileName, ex);
-		}
-	}
+    public String getResourceFilePath(String fileName) throws IOException {
+        return getResourceFile(fileName).getPath();
+    }
+
+    private Resource getResource(String fileName) {
+        return resourceLoader.getResource((new StringBuilder("classpath:").append(fileName)).toString());
+    }
+
+    public File loadXSDFile(String xsdFileName) {
+        String fileName = xsdFileName + ".xsd";
+        try {
+            File xsdFile = getResourceFile("/schemas/" + fileName);
+            if (xsdFile.exists()) {
+                return xsdFile;
+            } else {
+                throw new FileNotFoundException("File not found " + fileName);
+            }
+        } catch (IOException ex) {
+            throw new FileNotFoundException("File not found " + fileName, ex);
+        }
+    }
 }

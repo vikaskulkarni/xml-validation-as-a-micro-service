@@ -20,6 +20,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import com.validate.model.ValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +57,9 @@ public class UploadXMLApiController implements UploadXMLApi {
 
 		String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/")
 				.path(xmlFileName).toUriString();
-		boolean isValid = fileStorageService.validateXMLSchema(xmlFileName, xsdFileName);
+		ValidationResponse validationResponse = fileStorageService.validateXMLSchema(xmlFileName, xsdFileName);
 
-		return new UploadFileResponse(xmlFileName, fileDownloadUri, xmlFile.getContentType(), xmlFile.getSize(), isValid);
+		return new UploadFileResponse(xmlFileName, fileDownloadUri, xmlFile.getContentType(), xmlFile.getSize(), validationResponse);
 	}
 
 	@Override
