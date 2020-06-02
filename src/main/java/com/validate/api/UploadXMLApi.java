@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,38 +34,48 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "uploadXML")
 public interface UploadXMLApi {
 
-	@ApiOperation(value = "", nickname = "uploadSingleXMLFile", notes = "Upload a XML file for validation", tags = {
-			"xmlFile", })
-	@ApiResponses(value = { @ApiResponse(code = 201, message = "Created"),
-			@ApiResponse(code = 200, message = "Error", response = ErrorResponse.class) })
-	@RequestMapping(value = "/uploadSingleXMLFile/{xsdFileName}", produces = { "application/json" }, consumes = { "application/json",
-			"multipart/form-data" }, method = RequestMethod.POST)
-	UploadFileResponse uploadSingleXML(
-			@ApiParam(value = "file detail") @Valid @RequestPart("file") MultipartFile xmlFile,
-			@ApiParam(value = "Description of file contents.") @RequestParam(value = "note", required = false) String note,
-			@ApiParam(value = "Name of the xsd file") @PathVariable (value = "xsdFileName") String xsdFileName);
+    @ApiOperation(value = "", nickname = "uploadSingleXMLFile", notes = "Upload a XML file for validation", tags = {
+            "xmlFile",})
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 200, message = "Error", response = ErrorResponse.class)})
+    @RequestMapping(value = "/uploadSingleXMLFile/{xsdFileName}", produces = {"application/json"}, consumes = {
+            "multipart/form-data"}, method = RequestMethod.POST)
+    UploadFileResponse uploadSingleXML(
+            @ApiParam(value = "file detail") @Valid @RequestPart("file") MultipartFile xmlFile,
+            @ApiParam(value = "Description of file contents.") @RequestParam(value = "note", required = false) String note,
+            @ApiParam(value = "Name of the xsd file") @PathVariable(value = "xsdFileName") String xsdFileName);
 
-	@ApiOperation(value = "", nickname = "uploadMultipleXMLFiles", notes = "Upload multiple XML files for validation", tags = {
-			"xmlFile", })
-	@ApiResponses(value = { @ApiResponse(code = 201, message = "Created"),
-			@ApiResponse(code = 200, message = "Error", response = ErrorResponse.class) })
-	@RequestMapping(value = "/uploadMultipleXMLFiles", produces = { "application/json" }, consumes = {
-			"application/json", "multipart/form-data" }, method = RequestMethod.POST)
-	List<UploadFileResponse> uploadMultipleXMLFiles(MultipartFile[] files);
+    @ApiOperation(value = "", nickname = "uploadSingleXMLFile", notes = "Upload a XML file for validation", tags = {
+            "xmlFile",})
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 200, message = "Error", response = ErrorResponse.class)})
+    @RequestMapping(value = "/uploadXMLContent/{xsdFileName}", produces = {"application/json"}, consumes = {"application/xml"}, method = RequestMethod.POST)
+    UploadFileResponse uploadXMLContent(
+            @ApiParam(value = "file content") @Valid @RequestBody String xmlFileContent,
+            @ApiParam(value = "Description of file contents.") @RequestParam(value = "note", required = false) String note,
+            @ApiParam(value = "Name of the xsd file") @PathVariable(value = "xsdFileName") String xsdFileName);
 
-	@ApiOperation(value = "", nickname = "downloadXMLFile", notes = "Download file containing xmlFile", tags = {
-			"xmlFile", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success") })
-	@RequestMapping(value = "/downloadXMLFile/{fileName:.+}", produces = {
-			"application/json" }, method = RequestMethod.GET)
-	ResponseEntity<Resource> downloadFile(String fileName, HttpServletRequest request);
+    @ApiOperation(value = "", nickname = "uploadMultipleXMLFiles", notes = "Upload multiple XML files for validation", tags = {
+            "xmlFile",})
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 200, message = "Error", response = ErrorResponse.class)})
+    @RequestMapping(value = "/uploadMultipleXMLFiles", produces = {"application/json"}, consumes = {
+            "application/json", "multipart/form-data"}, method = RequestMethod.POST)
+    List<UploadFileResponse> uploadMultipleXMLFiles(MultipartFile[] files);
 
-	@ApiOperation(value = "", nickname = "uploadSingleXMLFileAsync", notes = "Upload a file containing xmlFile asynchronously", tags = {
-			"xmlFile", })
-	@ApiResponses(value = { @ApiResponse(code = 201, message = "Created"),
-			@ApiResponse(code = 200, message = "Error", response = ErrorResponse.class) })
-	@RequestMapping(value = "/uploadSingleXMLFileAsync", produces = { "application/json" }, consumes = {
-			"application/json", "multipart/form-data" }, method = RequestMethod.POST)
-	URL uploadXMLAsync(@Valid MultipartFile xmlFile, String note) throws MalformedURLException;
+    @ApiOperation(value = "", nickname = "downloadXMLFile", notes = "Download file containing xmlFile", tags = {
+            "xmlFile",})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Success")})
+    @RequestMapping(value = "/downloadXMLFile/{fileName:.+}", produces = {
+            "application/json"}, method = RequestMethod.GET)
+    ResponseEntity<Resource> downloadFile(String fileName, HttpServletRequest request);
+
+    @ApiOperation(value = "", nickname = "uploadSingleXMLFileAsync", notes = "Upload a file containing xmlFile asynchronously", tags = {
+            "xmlFile",})
+    @ApiResponses(value = {@ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 200, message = "Error", response = ErrorResponse.class)})
+    @RequestMapping(value = "/uploadSingleXMLFileAsync", produces = {"application/json"}, consumes = {
+            "application/json", "multipart/form-data"}, method = RequestMethod.POST)
+    URL uploadXMLAsync(@Valid MultipartFile xmlFile, String note) throws MalformedURLException;
 
 }

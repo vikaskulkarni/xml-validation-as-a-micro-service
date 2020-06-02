@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -45,68 +47,82 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public class UploadXMLApiController implements UploadXMLApi {
 
-	private static final Logger logger = LoggerFactory.getLogger(UploadXMLApiController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UploadXMLApiController.class);
 
-	@Autowired
-	private FileStorageService fileStorageService;
+    @Autowired
+    private FileStorageService fileStorageService;
 
-	@Override
-	public UploadFileResponse uploadSingleXML(@Valid @RequestPart("file") MultipartFile xmlFile,
-			@RequestParam(value = "note", required = false) String note, @PathParam(value = "xsdFileName") String xsdFileName) {
-		String xmlFileName = fileStorageService.storeFile(xmlFile);
+    @Override
+    public UploadFileResponse uploadSingleXML(@Valid @RequestPart("file") MultipartFile xmlFile,
+                                              @RequestParam(value = "note", required = false) String note, @PathParam(value = "xsdFileName") String xsdFileName) {
+        String xmlFileName = fileStorageService.storeFile(xmlFile);
+        return constructResponse(xmlFileName, xsdFileName, xmlFile.getContentType(), xmlFile.getSize());
+    }
 
-		String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/")
-				.path(xmlFileName).toUriString();
-		ValidationResponse validationResponse = fileStorageService.validateXMLSchema(xmlFileName, xsdFileName);
+    private UploadFileResponse constructResponse(String xmlFileName, String xsdFileName, String contentType, long fileSize) {
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadXMLFile/")
+                .path(xmlFileName).toUriString();
+        ValidationResponse validationResponse = fileStorageService.validateXMLSchema(xmlFileName, xsdFileName);
 
-		return new UploadFileResponse(xmlFileName, fileDownloadUri, xmlFile.getContentType(), xmlFile.getSize(), validationResponse);
-	}
+        return new UploadFileResponse(xmlFileName, fileDownloadUri, contentType, fileSize, validationResponse);
+    }
 
-	@Override
-	public URL uploadXMLAsync(@ApiParam(value = "file detail") @Valid @RequestPart("file") MultipartFile xmlFile,
-			@ApiParam(value = "Description of file contents.") @RequestParam(value = "note", required = false) String note)
-			throws MalformedURLException {
+    @Override
+    public UploadFileResponse uploadXMLContent(@Valid String xmlFileContent, String note, String xsdFileName) {
+        try {
+            String xmlFileName = fileStorageService.storeContent(xmlFileContent, "tempContentFor_" + xsdFileName);
+            return constructResponse(xmlFileName, xsdFileName, "application/xml", 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-		String uniqueID = UUID.randomUUID().toString();
-		/*
-		 * String getTokensUri =
-		 * ServletUriComponentsBuilder.fromCurrentContextPath().path("/uploadStatus/")
-		 * .path(uniqueID).toUriString();
-		 */
-		URL getXMLUri = new URL("http://localhost:10003/" + uniqueID);
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		executor.submit(() -> {
-			fileStorageService.storeFile(xmlFile);
-		});
+    @Override
+    public URL uploadXMLAsync(@ApiParam(value = "file detail") @Valid @RequestPart("file") MultipartFile xmlFile,
+                              @ApiParam(value = "Description of file contents.") @RequestParam(value = "note", required = false) String note)
+            throws MalformedURLException {
 
-		return getXMLUri;
-	}
+        String uniqueID = UUID.randomUUID().toString();
+        /*
+         * String getTokensUri =
+         * ServletUriComponentsBuilder.fromCurrentContextPath().path("/uploadStatus/")
+         * .path(uniqueID).toUriString();
+         */
+        URL getXMLUri = new URL("http://localhost:10003/" + uniqueID);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            fileStorageService.storeFile(xmlFile);
+        });
 
-	@Override
-	public List<UploadFileResponse> uploadMultipleXMLFiles(@RequestParam("files") MultipartFile[] files) {
-		return Arrays.asList(files).stream().map(file -> uploadSingleXML(file, "", "")).collect(Collectors.toList());
-	}
+        return getXMLUri;
+    }
 
-	@Override
-	public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-		// Load file as Resource
-		Resource resource = fileStorageService.loadFileAsResource(fileName);
+    @Override
+    public List<UploadFileResponse> uploadMultipleXMLFiles(@RequestParam("files") MultipartFile[] files) {
+        return Arrays.asList(files).stream().map(file -> uploadSingleXML(file, "", "")).collect(Collectors.toList());
+    }
 
-		// Try to determine file's content type
-		String contentType = null;
-		try {
-			contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-		} catch (IOException ex) {
-			logger.info("Could not determine file type.");
-		}
+    @Override
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
+        // Load file as Resource
+        Resource resource = fileStorageService.loadFileAsResource(fileName);
 
-		// Fallback to the default content type if type could not be determined
-		if (contentType == null) {
-			contentType = "application/octet-stream";
-		}
+        // Try to determine file's content type
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            logger.info("Could not determine file type.");
+        }
 
-		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-				.body(resource);
-	}
+        // Fallback to the default content type if type could not be determined
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
 }

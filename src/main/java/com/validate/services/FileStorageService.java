@@ -56,17 +56,22 @@ public class FileStorageService {
         }
     }
 
+    private Path getTemporaryFileLocation(String origFileName) {
+        String uniqueID = UUID.randomUUID().toString();
+        String fileName = uniqueID + "_" + StringUtils.cleanPath(origFileName);
+
+        validateFile(fileName);
+
+        return this.fileStorageLocation.resolve(fileName);
+    }
+
     public String storeFile(MultipartFile file) {
         logger.info("Storing File");
-        String uniqueID = UUID.randomUUID().toString();
-        String fileName = uniqueID + "_" + StringUtils.cleanPath(file.getOriginalFilename());
 
+        Path targetLocation = getTemporaryFileLocation(file.getOriginalFilename());
+        String fileName = targetLocation.getFileName().toString();
         try {
-            validateFile(fileName);
-
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
             return fileName;
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Exception:", ex);
@@ -113,5 +118,11 @@ public class FileStorageService {
         }
 
         return new ValidationResponse(true, -1, -1, "Validation Success!");
+    }
+
+    public String storeContent(String xmlFileContent, String tempFileName) throws IOException {
+        Path targetLocation = getTemporaryFileLocation(tempFileName);
+        Files.write(targetLocation, xmlFileContent.getBytes());
+        return targetLocation.getFileName().toString();
     }
 }
